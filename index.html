@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quantum Queen · Module 2 — The Shadow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;width:100%;font-family:'Montserrat',sans-serif;background:#1F1320;color:#EDD8E5;overflow:hidden}
+  #root{height:100vh;width:100vw}
+  ::-webkit-scrollbar{height:3px;width:4px}
+  ::-webkit-scrollbar-thumb{background:rgba(181,123,174,0.32);border-radius:2px}
+  textarea{font-family:'Montserrat',sans-serif;font-weight:500}
+  button{font-family:'Montserrat',sans-serif;outline:none}
+  @keyframes fadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes expandIn{0%{opacity:0;max-height:0}100%{opacity:1;max-height:5000px}}
+  .lesson-content{animation:fadeIn .3s ease both}
+  .expand-content{animation:expandIn .35s ease both;overflow:hidden}
+  @media(max-width:768px){
+    .desktop-only{display:none!important}
+    .mobile-only{display:flex!important}
+    .sidebar{position:absolute!important;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:transform .25s ease}
+    .sidebar.open{transform:translateX(0)}
+    .main-inner{padding:24px 20px 80px!important}
+    .lesson-top{flex-direction:column;gap:8px!important}
+    .lesson-bottom{flex-direction:column;align-items:stretch!important}
+    .lesson-bottom button{width:100%}
+  }
+  @media(min-width:769px){.mobile-only{display:none!important}}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1F1320;color:#B57BAE;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;z-index:9999;flex-direction:column;gap:12px}
+  .spinner{width:32px;height:32px;border:2px solid rgba(181,123,174,0.2);border-top-color:#B57BAE;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><div>✦ Loading your Quantum Queen…</div></div>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.0/babel.min.js"></script>
+
+<script type="text/babel">
+const e = React.createElement;
+const { useState, useEffect } = React;
+
+const MAUVE_LIGHT = "#B57BAE";
+const MAUVE_DEEP = "#6E3865";
+const BRAND_GRAD = "linear-gradient(135deg, " + MAUVE_LIGHT + " 0%, " + MAUVE_DEEP + " 100%)";
+const SIDEBAR_IMG = "https://raw.githubusercontent.com/badassalchemy/imageassets/main/mainbackground1.jpg";
+
+const DARK = {
+  bg: "#1F1320", bgCard: "#2A1A2D", darkMid: MAUVE_DEEP,
+  accent: MAUVE_DEEP, accentLt: MAUVE_LIGHT, detail: "#C99CC1",
+  moonPrl: "#FAEFF4", txt: "#FAEFF4", txtSec: "#EDD8E5",
+  txtMuted: "#C9A8BE", txtFaded: "#9B7090",
+  border: "rgba(181,123,174,0.18)", borderMid: "rgba(181,123,174,0.32)",
+  inputBg: "#160C18", shadow: "0 4px 20px rgba(45,15,35,0.4)"
+};
+
+const LIGHT = {
+  bg: "#FBF5F8", bgCard: "#FFFFFF", darkMid: MAUVE_DEEP,
+  accent: MAUVE_DEEP, accentLt: MAUVE_LIGHT, detail: MAUVE_LIGHT,
+  moonPrl: "#FFFFFF", txt: "#3A1E33", txtSec: "#5A2F4E",
+  txtMuted: "#7A4A6C", txtFaded: "#A87A9A",
+  border: "rgba(110,56,101,0.12)", borderMid: "rgba(110,56,101,0.22)",
+  inputBg: "#FBF5F8", shadow: "0 4px 20px rgba(110,56,101,0.1)"
+};
+
+const MODULE_DATA = {
+  title: "Module 2",
+  subtitle: "The Shadow",
+  tagline: "What you refuse to look at is running your life. We're done with that.",
+  lessons: [
+    {
+      id: 0, title: "Welcome to the Shadow", dur: "8-12 min", type: "video",
+      desc: "You just finished Module 1. You met the version of you that kept you safe but kept you small. You wrote her a letter. You started releasing her. Now we go deeper. In this module we meet the parts of you that were not allowed to exist — the rage, the ambition, the neediness, the hunger, the wildness. The parts that were sent underground because someone, somewhere, decided they were too much. This is shadow work. It is not therapy. It is not about fixing yourself. It is about reclaiming the parts of you that have been waiting in the dark for permission to come home.",
+      takeaways: [
+        "What you refuse to look at is running your life from underneath.",
+        "Shadow work is not about fixing yourself — it's about integration.",
+        "Every part you have rejected was once trying to protect you.",
+        "Integration, not elimination, is the goal. The shadow does not go away — she comes home."
+      ],
+      actions: [
+        "Watch the Module 2 welcome video inside the Skool classroom.",
+        "Settle in. This module asks more of you than the last one. That is by design.",
+        "If anything in this module surfaces real trauma, pause the work and reach out to a qualified professional. This program is for identity reclamation, not crisis support."
+      ]
+    },
+    {
+      id: 1, title: "Jungian Archetypes: A Map of the Shadow", dur: "15-20 min", type: "video",
+      desc: "Before we go inside, we need a map. Carl Jung gave us one. He identified universal patterns — archetypes — that live inside every human psyche. The Mother. The Lover. The Warrior. The Wild Woman. The Queen. The Witch. The parts of you that were celebrated became your conscious identity. The parts that were shamed went into the shadow. Both are still you. Both are running the show. This lesson teaches you to recognize which archetypes you have welcomed and which ones you have exiled — because the exiled ones are the ones costing you the most.",
+      takeaways: [
+        "Every archetype that lives in you has a light expression and a shadow expression.",
+        "The archetype you most reject in other women is usually the one you have exiled in yourself.",
+        "Your strongest archetypes are the ones you fear most — that fear is the map.",
+        "You are not one archetype. You are a council of them. Sovereignty means knowing who is speaking when."
+      ],
+      actions: [
+        "Watch the Archetypes breakdown video inside the Skool classroom.",
+        "Notice which archetype made you flinch, dismiss it, or roll your eyes — that is the assignment.",
+        "Use the journal below to identify your dominant light and shadow archetypes."
+      ],
+      prompt: "I'm working through the Jungian archetypes lesson in Module 2 of Quantum Queen. Help me identify which archetypes I am consciously living and which ones I have exiled into my shadow. Ask me 4-5 questions about which archetypes I am most drawn to, which ones I judge most harshly in other women, and which expressions of feminine power I have been suppressing. Help me see the pattern without flinching. Be honest, archetype-literate, and direct.",
+      journals: [
+        { id: "arch-1", prompt: "Which archetype do I most identify with in my conscious life? The Mother, the Lover, the Warrior, the Wild Woman, the Queen, the Witch, the Sage, the Creatrix — which one do I lead with?" },
+        { id: "arch-2", prompt: "Which archetype do I most judge or dismiss in other women? That is the one I have exiled in myself." },
+        { id: "arch-3", prompt: "Which version of feminine power was I taught was too much, too loud, too dangerous, too selfish? Name her." },
+        { id: "arch-4", prompt: "If she were no longer exiled — if she came home tomorrow — what would change in my life within thirty days?" }
+      ]
+    },
+    {
+      id: 2, title: "The Shadow Inventory · 30 Questions", dur: "60-90 min", type: "inventory",
+      desc: "This is the longest exercise in the entire program. Do not do it in one sitting. Thirty questions, four parts. Surface. Pattern. Wound. Reclamation. The questions that piss you off are the ones you need most — that irritation is information. Write by hand if you can, then transfer your most charged answers in here. The nervous system processes ink differently than typing, but typing what you find is how we make it real on the page.",
+      desc2: "How to use this: Read each question slowly. Answer from your gut, not your head. There are no right answers — only honest ones. You can return to this as many times as you need. When you are ready, download your answers as a private document. This is yours. Nobody else needs to see it. Not to fix yourself. To free yourself.",
+      takeaways: [
+        "If a question gives you a yes or no answer, you are not done. Keep going until you have an example.",
+        "The questions that make you uncomfortable are the assignment — not the ones you can answer easily.",
+        "This is not a productivity task. It is a homecoming. Treat it like one.",
+        "Self-trust is the root of everything you actually want. These questions show you exactly where you have been outsourcing it."
+      ],
+      actions: [
+        "Work through one Part per sitting. Do not try to do all 30 in one day.",
+        "Use the expandable sections below — open one Part at a time.",
+        "When you finish a Part, mark this lesson complete only after all four are done.",
+        "Download your answers when you finish all 30. Save them. You will read them again on Day 90."
+      ],
+      prompt: "I'm working through the 30 Shadow Inventory questions in Module 2 of Quantum Queen. I'm in Part [Surface / Pattern / Wound / Reclamation]. Help me go deeper on the questions that are bringing up the most charge. Do not move me off the discomfort — sit in it with me. Ask me follow-up questions that help me see the pattern under the pattern. Be unflinching but never shaming. Speak to me like a Queen who is remembering.",
+      inventoryParts: [
+        {
+          id: "part-1",
+          part: "Part One",
+          title: "The Surface",
+          intro: "Where you are right now, before we get into why. Just notice.",
+          questions: [
+            { id: "sq-1", q: "What is the version of yourself you have been performing this week?", deeper: "Not who you are. Who you've been pretending to be. Name her. Where did she show up — in meetings, with your partner, on Instagram, with your mother?" },
+            { id: "sq-2", q: "What were you doing the last time you felt fully like yourself?", deeper: "Where, who with, what time of day. We're looking for the conditions that let her out." },
+            { id: "sq-3", q: "Where in your life are you waiting for someone to give you permission?", deeper: "Permission to charge more, leave, rest, start, stop, want what you want. Name the specific situation and who you're waiting on." },
+            { id: "sq-4", q: "What are you tolerating right now that the future version of you would not?", deeper: "Be specific. A friendship, a price point, a tone someone takes with you, a recurring thought, a habit." },
+            { id: "sq-5", q: "What is the lie you have been telling people about how you are doing?", deeper: "The polished version you give when someone asks. Now write the unpolished one." },
+            { id: "sq-6", q: "What are you doing for validation that you would stop doing if no one was watching?", deeper: "Posting, performing, over-explaining, over-delivering, the way you dress, the way you laugh. What's for them and not for you?" },
+            { id: "sq-7", q: "What does your body know that your mind keeps overriding?", deeper: "The thing your gut has been telling you for months that you keep talking yourself out of. Say it on paper." }
+          ]
+        },
+        {
+          id: "part-2",
+          part: "Part Two",
+          title: "The Pattern",
+          intro: "The same lesson keeps showing up in a different outfit. Time to see it.",
+          questions: [
+            { id: "sq-8", q: "Write down the last three times you felt taken advantage of. What is the through-line?", deeper: "Same dynamic, different person? Same role you kept playing? The pattern is the assignment." },
+            { id: "sq-9", q: "Who in your life trained you to make yourself smaller, and how do you still do it for them in your head?", deeper: "They don't even need to be in the room anymore. You're doing their job for them. Where?" },
+            { id: "sq-10", q: "What kind of woman do you keep attracting, and what does it tell you about who you are still showing up as?", deeper: "Romantic, professional, friendship. We attract from our identity, not our desires. What identity is doing the attracting?" },
+            { id: "sq-11", q: "Where are you under-charging, under-asking, under-receiving — and what would it cost you to stop?", deeper: "Not just money. Time, energy, recognition, rest, pleasure. What's the real fear under the under?" },
+            { id: "sq-12", q: "What did you learn about money as a little girl, and where can you see those lessons running your business right now?", deeper: "The exact phrases you heard. Who said them. How they show up in your pricing, your spending, your relationship to receiving." },
+            { id: "sq-13", q: "Where do you abandon yourself first in a relationship, and how soon does it happen?", deeper: "Your opinion, your needs, your schedule, your friends, your work. Map the timeline." },
+            { id: "sq-14", q: "What are you afraid will happen if you actually start trusting yourself?", deeper: "Be honest. Most of us aren't avoiding self-trust because we don't know how. We're avoiding it because we know what it will cost us." },
+            { id: "sq-15", q: "What is the cost of staying exactly as you are for another year?", deeper: "Financially. Relationally. In your body. In your work. Write the number, name the person, describe the feeling." }
+          ]
+        },
+        {
+          id: "part-3",
+          part: "Part Three",
+          title: "The Wound",
+          intro: "Underneath every pattern is the same fracture: somewhere, you stopped believing yourself.",
+          questions: [
+            { id: "sq-16", q: "When was the first time you remember not being believed, and what did you decide about yourself in that moment?", deeper: "The decision is the wound. Not the event. What did you conclude — about your perception, your worth, your voice?" },
+            { id: "sq-17", q: "Whose voice is in your head when you talk yourself out of something you wanted?", deeper: "It's almost never yours. Name them. What exactly do they say? Write it word for word." },
+            { id: "sq-18", q: "What is the dream you have downgraded so many times that you've forgotten the original version?", deeper: "Write the original. The one before you got reasonable. Before you made it palatable for other people." },
+            { id: "sq-19", q: "Where are you treating your intuition like a suggestion instead of an instruction?", deeper: "Give me three specific situations from this year. What did your knowing say, and what did you do instead?" },
+            { id: "sq-20", q: "What part of yourself did you have to abandon to be loved by the people who raised you?", deeper: "Loud, sensitive, ambitious, soft, sexual, angry, big, hungry. What got you praise, and what got you punished?" },
+            { id: "sq-21", q: "Who would you have to disappoint to live the life you actually want?", deeper: "Name them. By first name. And write down what specifically would disappoint them about you choosing yourself." },
+            { id: "sq-22", q: "What are you still trying to prove, and to whom?", deeper: "If they finally said you were enough, what would you actually do differently? Anything? Or are you just refueling the chase?" },
+            { id: "sq-23", q: "Where are you confusing being needed with being loved?", deeper: "In your business, with your clients, with your family, with your partner. Where does your worth get tied to your usefulness?" }
+          ]
+        },
+        {
+          id: "part-4",
+          part: "Part Four",
+          title: "The Reclamation",
+          intro: "You don't fix the pattern. You become the woman who no longer fits inside it.",
+          questions: [
+            { id: "sq-24", q: "Who is the version of you that already trusts herself completely? Describe her morning.", deeper: "What she wears. What she eats. What she says no to before noon. What she charges. How she speaks to herself in the mirror." },
+            { id: "sq-25", q: "What would you have to stop doing this week for her to recognize you?", deeper: "Not start. Stop. Identity work is mostly subtraction. What goes?" },
+            { id: "sq-26", q: "What does she charge, who does she work with, and what does she refuse?", deeper: "Specific numbers. Specific client archetypes. Specific dynamics she will not entertain. Write the policy." },
+            { id: "sq-27", q: "Where in your body do you feel her? And where do you feel the old version?", deeper: "Old version usually lives in the shoulders, the jaw, the stomach. The new one tends to live lower — hips, belly, chest. Find her in the body first." },
+            { id: "sq-28", q: "What is the decision you have been circling for months that she would make in ten seconds?", deeper: "Write the decision. Write the timeline you've been giving it. Now write what she would do today." },
+            { id: "sq-29", q: "What evidence do you already have that she is real and that you can become her?", deeper: "The moments you have already trusted yourself and were right. The times you walked away. The times you charged it. Build the case." },
+            { id: "sq-30", q: "If self-trust is the root of everything you actually want — the money, the man, the work, the body, the life — what is the one practice you commit to starting tomorrow?", deeper: "Not ten. One. Small enough that you cannot fail. What is the first vote you cast for her?" }
+          ]
+        }
+      ]
+    },
+    {
+      id: 3, title: "Trigger + Shame Audit", dur: "30-40 min", type: "journal",
+      desc: "Your triggers are not random. Your shame is not random. Both are direct evidence of where your shadow lives. When something a stranger does on the internet makes you irrationally furious — that is a shadow signal. When something happened years ago and you still cannot speak it out loud — that is a shadow signal. In this lesson we audit both. Triggers show you what you have judged in yourself. Shame shows you what you have buried. Together they form a treasure map. The Queen does not run from her triggers or her shame. She follows them home.",
+      takeaways: [
+        "A trigger is a teacher dressed as an attack — what enrages you in others is what you have exiled in yourself.",
+        "Shame is not a sign you are broken. Shame is a sign that something inside you is still waiting to be witnessed.",
+        "You cannot reclaim what you will not look at. The audit is the looking.",
+        "Naming a shame out loud — even on paper — reduces its grip by half. That is not a metaphor. That is nervous system science."
+      ],
+      actions: [
+        "Complete the Trigger Audit prompts below — be specific, name the people, name the patterns.",
+        "Then complete the Shame Audit. Slow down here. Breathe between answers.",
+        "If you cry, good. If you feel rage, good. Both mean the work is landing.",
+        "Save your entries. We use them in the Integration Letter."
+      ],
+      prompt: "I'm doing the Trigger and Shame Audit in Module 2 of Quantum Queen. Help me map my biggest triggers and the shame underneath them. For each trigger, help me trace what part of myself I am rejecting that gets reflected back at me. For each shame, help me find the woman underneath who is still waiting to be witnessed. Be unflinching but tender. Do not rush me out of the discomfort.",
+      journals: [
+        { id: "trig-1", prompt: "Trigger Audit — The kind of woman who triggers me the most is... What specifically about her sets me off?" },
+        { id: "trig-2", prompt: "What does that trigger reveal about a quality I have exiled in myself? (Anger, ambition, sexuality, neediness, softness, loudness, money, rest — what does she have permission to be that I have not given myself?)" },
+        { id: "trig-3", prompt: "Trigger Audit — The behavior in a partner or friend that lights me up the fastest is... What is the underneath fear?" },
+        { id: "trig-4", prompt: "Trigger Audit — The kind of success in other women that makes me feel small or competitive is... What does that tell me I am still afraid to want?" },
+        { id: "shame-1", prompt: "Shame Audit — The thing I am most ashamed of that I have never told anyone is... (You don't have to write the whole thing. Write enough that you have looked at it.)" },
+        { id: "shame-2", prompt: "Shame Audit — The part of my body, my voice, my desire, or my history I have been hiding is... When did I learn to hide it, and from whom?" },
+        { id: "shame-3", prompt: "Shame Audit — The shame I am still carrying about money — earning it, spending it, wanting it, not having it — sounds like..." },
+        { id: "shame-4", prompt: "Shame Audit — What is the shame I am ready to set down? What would my life look like in 30 days without it?" }
+      ]
+    },
+    {
+      id: 4, title: "The Reclamation Practice", dur: "20-30 min", type: "reclamation",
+      desc: "You have now seen her. The exiled archetypes. The patterns. The triggers. The shame. Now we begin the reclamation — not in your head, in your body. Reclamation is not a thought. It is a practice. It is the moment you take back the qualities you exiled and put them back into your daily life, on purpose. Not all at once. Not perfectly. One reclamation at a time. This is how integration becomes lived experience, not journal theory.",
+      takeaways: [
+        "Reclamation is a body practice, not a mental decision.",
+        "You reclaim a part of yourself by giving it permission to express in small, specific, repeatable ways.",
+        "Identity shifts faster through embodied action than through insight. Insight without action is just sophisticated avoidance.",
+        "Your reclamation practice is not optional. It is how the work in this module becomes irreversible."
+      ],
+      actions: [
+        "Identify the top 3 qualities you exiled — pulled from your Shadow Inventory and Trigger Audit.",
+        "For each one, design one specific reclamation practice you can do in the next 7 days.",
+        "Schedule them. Put them in your calendar. Tell one person.",
+        "Come back here and journal what shifted after each practice."
+      ],
+      prompt: "I'm designing my Reclamation Practice in Module 2 of Quantum Queen. Help me take the qualities I have exiled — the anger, ambition, sexuality, softness, neediness, wildness, whatever surfaced — and design 3 specific, embodied practices I can do this week to bring them back online. Make them small enough that I cannot fail but charged enough that they will actually move the needle. Be practical, not theoretical.",
+      reclamationFields: [
+        {
+          id: "rec-1",
+          title: "Reclamation One",
+          intro: "The first quality I am reclaiming",
+          fields: [
+            { id: "rec-1-quality", label: "The exiled quality I am bringing home", placeholder: "Anger, ambition, sensuality, softness, neediness, rest, hunger..." },
+            { id: "rec-1-practice", label: "The specific practice I will do this week", placeholder: "Be embodied. Be specific. Make it real." },
+            { id: "rec-1-when", label: "When and how often", placeholder: "Day, time, frequency. Schedule it." },
+            { id: "rec-1-witness", label: "Who I am telling about this practice", placeholder: "One witness. Accountability is sovereignty." }
+          ]
+        },
+        {
+          id: "rec-2",
+          title: "Reclamation Two",
+          intro: "The second quality I am reclaiming",
+          fields: [
+            { id: "rec-2-quality", label: "The exiled quality I am bringing home", placeholder: "Anger, ambition, sensuality, softness, neediness, rest, hunger..." },
+            { id: "rec-2-practice", label: "The specific practice I will do this week", placeholder: "Be embodied. Be specific. Make it real." },
+            { id: "rec-2-when", label: "When and how often", placeholder: "Day, time, frequency. Schedule it." },
+            { id: "rec-2-witness", label: "Who I am telling about this practice", placeholder: "One witness. Accountability is sovereignty." }
+          ]
+        },
+        {
+          id: "rec-3",
+          title: "Reclamation Three",
+          intro: "The third quality I am reclaiming",
+          fields: [
+            { id: "rec-3-quality", label: "The exiled quality I am bringing home", placeholder: "Anger, ambition, sensuality, softness, neediness, rest, hunger..." },
+            { id: "rec-3-practice", label: "The specific practice I will do this week", placeholder: "Be embodied. Be specific. Make it real." },
+            { id: "rec-3-when", label: "When and how often", placeholder: "Day, time, frequency. Schedule it." },
+            { id: "rec-3-witness", label: "Who I am telling about this practice", placeholder: "One witness. Accountability is sovereignty." }
+          ]
+        }
+      ]
+    },
+    {
+      id: 5, title: "The Integration Letter", dur: "30-45 min", type: "letter",
+      desc: "You have spent this entire module meeting your shadow — the parts of yourself that were pushed underground because someone, somewhere, decided they were too much. Your anger. Your ambition. Your neediness. Your sexuality. Your grief. Your hunger for more. And now comes the most important part. Welcoming her home. This is not a therapeutic exercise. This is a declaration. A ceremony. A moment when you consciously and deliberately choose to stop abandoning the parts of yourself you were taught to hide and instead invite them back into the wholeness of who you are. Because here is what nobody tells you about shadow work. The goal was never to fix your shadow. The goal was never to overcome her, manage her, or keep her quiet. The goal is integration. And integration starts with a letter.",
+      desc2: "Your shadow self is not your enemy. She never was. Every single part of you that you have suppressed, judged, or been ashamed of was trying to protect you. The rage that you swallowed for years — she was trying to protect your boundaries. The neediness you learned to hide — she was trying to get the connection you deserved. The ambition you downplayed so other people would stay comfortable — she was trying to lead you toward the life you were born for. She has been underground. Alone. Waiting. She does not need your judgment. She has had enough of that. She needs your compassion. Your recognition. Your welcome.",
+      takeaways: [
+        "Your shadow self was never your enemy — she was your protector.",
+        "Do not edit this letter. Write it the way you would speak to someone you love who has been waiting a very long time to be found.",
+        "There is no wrong way to do this. There is only honest and not honest.",
+        "Read it out loud when you are done. Hearing your own voice say the words makes it land in the body, not just the mind. Integration lives in the body."
+      ],
+      actions: [
+        "Find a quiet space. Light a candle if you have one.",
+        "Write the full letter below using the prompts as your guide.",
+        "Take as long as you need. Some women write a paragraph. Some write four pages. Both are right.",
+        "When you finish — read it out loud, alone. Then save it."
+      ],
+      prompt: "I'm writing my Integration Letter for Module 2 of Quantum Queen. This is a letter to my shadow self — the parts of me I exiled, suppressed, judged. Help me write this letter from a place of welcome, not apology. Ask me what she protected me from, what gift she carries, and what I am ready to reclaim through her. Be tender, unflinching, and honest. Help me bring her home.",
+      letterPrompts: [
+        "Start by addressing her directly. Not 'dear shadow self' if that feels clinical. Write to the specific part of you that came up most powerfully in this module. Your rage. Your grief. The little girl who learned to make herself small. The woman who kept saying yes when she meant no. Whoever showed up — write to her.",
+        "I know you have been waiting for me to come find you. I am sorry it took me so long. Tell her how long she has been waiting. Acknowledge the specific experiences that sent her underground.",
+        "I understand now why you showed up the way you did. Explain what you now understand about her behavior — the coping mechanism that looked like a flaw but was actually protection.",
+        "I am sorry for the ways I rejected you. Be specific. The times you suppressed her. The times you were ashamed of her. The times you let other people shame her and you did not defend her.",
+        "What you were protecting me from makes sense. Name it. The rejection. The abandonment. The humiliation. The loss. The original wound she has been guarding.",
+        "But I do not need you to protect me that way anymore. Tell her you are grown now. That you have tools she did not have when she was formed.",
+        "I want you back. Not the managed, sanitized version. All of you. Be specific about what parts of her you are reclaiming and how.",
+        "You are not something to be overcome. You are part of what makes me powerful. Tell her what gift she carries. Every shadow has one.",
+        "You belong here. With me. As me. Close by welcoming her home. Not as a guest. Not as something you are tolerating. As a part of you. As the missing piece that makes you whole."
+      ],
+      letterFieldId: "integration-letter"
+    },
+    {
+      id: 6, title: "Shadow Integration Meditation", dur: "20 min", type: "video",
+      desc: "The final practice of this module. A guided meditation to integrate everything you have surfaced in these lessons at the nervous system level. You have done the cognitive work — the inventory, the audit, the letter. Now we let the body finish the integration. Put on headphones. Find a private space. Lie down if you can. Let yourself go all the way in.",
+      takeaways: [
+        "Shadow integration is finalized in the body, not the mind.",
+        "What you have brought into awareness in this module needs to be felt to become permanent.",
+        "The meditation is the closure ceremony for everything you have surfaced.",
+        "What you feel during this practice is the new frequency you are calling in."
+      ],
+      actions: [
+        "Find a quiet, private space. Headphones on. Lie down if you can.",
+        "Press play on the Shadow Integration Meditation inside the Skool classroom.",
+        "Do not skip this. The meditation is what closes the container of this module.",
+        "Afterwards, write what came up in the journal below — even one sentence."
+      ],
+      journals: [
+        { id: "shadow-med-1", prompt: "What did I feel in my body during the meditation? Where did I feel her?" },
+        { id: "shadow-med-2", prompt: "What surprised me about meeting her this way?" },
+        { id: "shadow-med-3", prompt: "What is one thing the integrated version of me would do differently this week?" }
+      ]
+    }
+  ]
+};
+
+const STORAGE_KEY = "quantumqueen-module2-v1";
+
+function App() {
+  const [theme, setTheme] = useState("dark");
+  const [active, setActive] = useState(0);
+  const [done, setDone] = useState({});
+  const [journals, setJournals] = useState({});
+  const [copied, setCopied] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [expandedParts, setExpandedParts] = useState({});
+
+  const C = theme === "dark" ? DARK : LIGHT;
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.theme) setTheme(s.theme);
+        if (s.done) setDone(s.done);
+        if (s.journals) setJournals(s.journals);
+        if (s.expandedParts) setExpandedParts(s.expandedParts);
+      }
+    } catch (err) {}
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme, done, journals, expandedParts }));
+    } catch (err) {}
+  }, [theme, done, journals, expandedParts, loaded]);
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+  const toggleDone = (i) => setDone({ ...done, [i]: !done[i] });
+  const togglePart = (id) => setExpandedParts({ ...expandedParts, [id]: !expandedParts[id] });
+
+  const updateJournal = (fieldId, text) => {
+    const existing = journals[fieldId] || {};
+    setJournals({ ...journals, [fieldId]: { text, savedAt: existing.savedAt } });
+  };
+
+  const saveLessonJournals = () => {
+    const stamp = new Date().toISOString();
+    const next = { ...journals };
+    const lesson = MODULE_DATA.lessons[active];
+    const ids = [];
+    if (lesson.journals) lesson.journals.forEach(j => ids.push(j.id));
+    if (lesson.inventoryParts) lesson.inventoryParts.forEach(p => p.questions.forEach(q => ids.push(q.id)));
+    if (lesson.reclamationFields) lesson.reclamationFields.forEach(r => r.fields.forEach(f => ids.push(f.id)));
+    if (lesson.letterFieldId) ids.push(lesson.letterFieldId);
+    ids.forEach(id => {
+      if (next[id] && next[id].text) next[id] = { ...next[id], savedAt: stamp };
+    });
+    setJournals(next);
+    setSaveStatus("Saved ✦");
+    setTimeout(() => setSaveStatus(""), 2000);
+  };
+
+  const copyText = (text) => {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;left:-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {}
+  };
+
+  const getEntries = (lesson) => {
+    const out = [];
+    if (lesson.journals) lesson.journals.forEach(j => {
+      const en = journals[j.id];
+      if (en && en.text) out.push({ prompt: j.prompt, text: en.text });
+    });
+    if (lesson.inventoryParts) lesson.inventoryParts.forEach(p => {
+      p.questions.forEach(q => {
+        const en = journals[q.id];
+        if (en && en.text) out.push({ prompt: p.part + " · " + p.title + " — " + q.q, text: en.text });
+      });
+    });
+    if (lesson.reclamationFields) lesson.reclamationFields.forEach(r => {
+      r.fields.forEach(f => {
+        const en = journals[f.id];
+        if (en && en.text) out.push({ prompt: r.title + " — " + f.label, text: en.text });
+      });
+    });
+    if (lesson.letterFieldId) {
+      const en = journals[lesson.letterFieldId];
+      if (en && en.text) out.push({ prompt: lesson.title, text: en.text });
+    }
+    return out;
+  };
+
+  const download = (filename, content) => {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportLesson = (lesson) => {
+    const entries = getEntries(lesson);
+    const body = entries.length === 0 ? "No entries yet." : entries.map(en => en.prompt + "\n\n" + en.text + "\n\n────────────").join("\n\n");
+    const content = "BADASS ALCHEMY · QUANTUM QUEEN\n" + MODULE_DATA.title + " — " + MODULE_DATA.subtitle + "\n" + lesson.title + "\nExported: " + new Date().toLocaleString() + "\n\n═════════════\n\n" + body;
+    download("quantum-queen-" + lesson.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".txt", content);
+  };
+
+  const exportAll = () => {
+    const sections = MODULE_DATA.lessons.map(l => {
+      const ents = getEntries(l);
+      if (ents.length === 0) return null;
+      return l.title.toUpperCase() + "\n\n" + ents.map(en => en.prompt + "\n\n" + en.text).join("\n\n────────\n\n");
+    }).filter(Boolean).join("\n\n═════════════\n\n");
+    const content = "BADASS ALCHEMY · QUANTUM QUEEN\n" + MODULE_DATA.title + " — " + MODULE_DATA.subtitle + "\nFull Journal Export\nExported: " + new Date().toLocaleString() + "\n\n═════════════\n\n" + (sections || "No entries yet.");
+    download("quantum-queen-module-2-full-journal.txt", content);
+  };
+
+  const doneCount = Object.values(done).filter(Boolean).length;
+  const progress = Math.round((doneCount / MODULE_DATA.lessons.length) * 100);
+  const lesson = MODULE_DATA.lessons[active];
+  const sidebarOverlay = theme === "dark"
+    ? "linear-gradient(180deg, rgba(31,19,32,0.78) 0%, rgba(42,26,45,0.85) 100%)"
+    : "linear-gradient(180deg, rgba(251,245,248,0.88) 0%, rgba(245,232,239,0.92) 100%)";
+
+  return (
+    <div style={{ fontFamily: "'Montserrat',sans-serif", background: C.bg, color: C.txtSec, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+      {/* TOP BAR */}
+      <div style={{ background: BRAND_GRAD, padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, borderBottom: "1px solid " + C.border }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button onClick={() => setMobileNav(!mobileNav)} className="mobile-only" style={{ background: "none", border: "none", color: "#3A1E33", fontSize: 20, cursor: "pointer", padding: 4 }}>☰</button>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.4)" }}>
+            <span style={{ color: "#3A1E33", fontSize: 16, fontWeight: 700 }}>✦</span>
+          </div>
+          <div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 700, fontSize: 18, color: "#FFFFFF", lineHeight: 1 }}>Quantum Queen</div>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: "#3A1E33", textTransform: "uppercase", marginTop: 3 }}>Badass Alchemy · Baddie Society</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <div style={{ display: "flex", gap: 24 }} className="desktop-only">
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, color: "#FFFFFF", textTransform: "uppercase", borderBottom: "2px solid #3A1E33", paddingBottom: 22, paddingTop: 22 }}>Classroom</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, color: "rgba(58,30,51,0.7)", textTransform: "uppercase", paddingBottom: 22, paddingTop: 22 }}>Community</span>
+          </div>
+          <button onClick={toggleTheme} style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.4)", borderRadius: 50, padding: "7px 14px", cursor: "pointer", color: "#3A1E33", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
+            <span style={{ fontSize: 13 }}>{theme === "dark" ? "☾" : "☀"}</span>
+            <span className="desktop-only">{theme === "dark" ? "Dark" : "Light"}</span>
+          </button>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+        {mobileNav && <div onClick={() => setMobileNav(false)} className="mobile-only" style={{ position: "absolute", inset: 0, background: "rgba(31,19,32,0.7)", zIndex: 99 }} />}
+
+        <div className={mobileNav ? "sidebar open" : "sidebar"} style={{
+          width: 300, minWidth: 300, display: "flex", flexDirection: "column", overflow: "hidden",
+          backgroundImage: sidebarOverlay + ", url('" + SIDEBAR_IMG + "')",
+          backgroundSize: "cover", backgroundPosition: "center",
+          borderRight: "1px solid " + C.border
+        }}>
+          <div style={{ padding: "26px 22px 22px", borderBottom: "1px solid " + C.border, background: theme === "dark" ? "rgba(22,12,24,0.35)" : "rgba(255,255,255,0.2)" }}>
+            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1.5, color: theme === "dark" ? C.accentLt : C.accent, textTransform: "uppercase", marginBottom: 6 }}>{MODULE_DATA.title}</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 24, fontWeight: 700, color: C.txt, lineHeight: 1.15, marginBottom: 4 }}>{MODULE_DATA.subtitle}</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 12, fontStyle: "italic", color: theme === "dark" ? C.detail : C.accent, marginBottom: 16, lineHeight: 1.4 }}>{MODULE_DATA.tagline}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ flex: 1, height: 5, background: theme === "dark" ? "rgba(250,239,244,0.1)" : "rgba(110,56,101,0.15)", borderRadius: 100, overflow: "hidden" }}>
+                <div style={{ height: "100%", background: "linear-gradient(90deg," + C.accent + "," + C.accentLt + ")", width: progress + "%", borderRadius: 100, transition: "width .5s" }} />
+              </div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: theme === "dark" ? C.accentLt : C.accent, minWidth: 30, textAlign: "right" }}>{progress}%</div>
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: "auto", padding: "14px 12px 24px" }}>
+            {MODULE_DATA.lessons.map((l, i) => {
+              const isActive = active === i;
+              const isDone = !!done[i];
+              return (
+                <div key={i} onClick={() => { setActive(i); setMobileNav(false); }} style={{
+                  display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", borderRadius: 12, cursor: "pointer", marginBottom: 4,
+                  background: isActive ? (theme === "dark" ? "rgba(110,56,101,0.45)" : "rgba(255,255,255,0.7)") : (theme === "dark" ? "rgba(22,12,24,0.3)" : "rgba(255,255,255,0.35)"),
+                  border: "1px solid " + (isActive ? C.borderMid : "transparent")
+                }}>
+                  <div style={{ width: 22, height: 22, minWidth: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: isDone ? "linear-gradient(135deg," + C.accent + "," + C.accentLt + ")" : "transparent", border: isDone ? "none" : "1.5px solid " + C.borderMid }}>
+                    {isDone && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700 }}>✓</span>}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12.5, color: isActive ? C.txt : C.txtSec, fontWeight: isActive ? 700 : 500, lineHeight: 1.3 }}>{l.title}</div>
+                    <div style={{ fontSize: 8, color: theme === "dark" ? C.txtFaded : C.txtMuted, letterSpacing: 0.5, marginTop: 2, fontWeight: 600 }}>{l.dur}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ padding: "14px 16px", borderTop: "1px solid " + C.border, background: theme === "dark" ? "rgba(22,12,24,0.5)" : "rgba(255,255,255,0.4)" }}>
+            <button onClick={exportAll} style={{ width: "100%", fontSize: 9, fontWeight: 700, letterSpacing: 1.2, color: C.txt, background: "transparent", padding: "11px 12px", borderRadius: 50, border: "1px solid " + C.borderMid, cursor: "pointer", textTransform: "uppercase" }}>
+              ⬇ Download All Journals
+            </button>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, overflowY: "auto", background: C.bg }}>
+          <div style={{ maxWidth: 720, padding: "36px 40px 80px" }} className="main-inner lesson-content" key={active + "-" + theme}>
+
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: C.accent, textTransform: "uppercase", marginBottom: 10 }}>
+              Lesson {lesson.id + 1} of {MODULE_DATA.lessons.length} · {lesson.dur}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 22 }} className="lesson-top">
+              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 700, fontSize: "clamp(26px,3.5vw,34px)", color: C.txt, lineHeight: 1.15 }}>{lesson.title}</h1>
+              <button onClick={() => toggleDone(active)} style={{ flexShrink: 0, marginTop: 6, fontSize: 9, fontWeight: 700, letterSpacing: 1.2, padding: "10px 18px", borderRadius: 50, border: done[active] ? "none" : "1px solid " + C.borderMid, cursor: "pointer", background: done[active] ? "linear-gradient(135deg," + C.accent + "," + C.accentLt + ")" : "transparent", color: done[active] ? C.moonPrl : C.txtMuted, textTransform: "uppercase" }}>
+                {done[active] ? "✦ Complete" : "○ Mark Complete"}
+              </button>
+            </div>
+
+            {lesson.type === "video" && (
+              <div style={{ background: BRAND_GRAD, borderRadius: 14, border: "1px solid " + C.borderMid, padding: "24px 26px", marginBottom: 28, boxShadow: theme === "light" ? C.shadow : "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                  <div style={{ width: 52, height: 52, minWidth: 52, borderRadius: "50%", background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.4)" }}>
+                    <span style={{ fontSize: 20, color: "#FFFFFF" }}>▶</span>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#3A1E33", textTransform: "uppercase", marginBottom: 6 }}>Video Lesson</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.35 }}>Watch this lesson inside the <em style={{ color: "#2A1424", fontStyle: "italic", fontWeight: 700 }}>Skool classroom.</em></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ fontWeight: 500, fontSize: 14.5, lineHeight: 1.8, color: C.txtSec, marginBottom: lesson.desc2 ? 18 : 36 }}>
+              {lesson.desc}
+            </div>
+
+            {lesson.desc2 && (
+              <div style={{ fontWeight: 500, fontSize: 14.5, lineHeight: 1.8, color: C.txtSec, marginBottom: 36, fontStyle: "italic", paddingLeft: 18, borderLeft: "2px solid " + C.borderMid }}>
+                {lesson.desc2}
+              </div>
+            )}
+
+            <SectionHeader icon="🌙" label="Key Takeaways" color={C.accent} />
+            <div style={{ marginBottom: 36 }}>
+              {lesson.takeaways.map((t, i) => (
+                <div key={i} style={{ background: C.bgCard, borderRadius: 12, border: "1px solid " + C.border, padding: "14px 18px", marginBottom: 8, display: "flex", alignItems: "flex-start", gap: 12, boxShadow: theme === "light" ? "0 2px 8px rgba(110,56,101,0.06)" : "none" }}>
+                  <span style={{ color: C.accent, fontSize: 13, marginTop: 3, flexShrink: 0 }}>✦</span>
+                  <span style={{ fontWeight: 500, fontSize: 13.5, color: C.txtSec, lineHeight: 1.7 }}>{t}</span>
+                </div>
+              ))}
+            </div>
+
+            <SectionHeader icon="⭐" label="Action Steps" color={C.accent} />
+            <div style={{ marginBottom: 36 }}>
+              {lesson.actions.map((a, i) => (
+                <div key={i} style={{ background: C.bgCard, borderRadius: 12, border: "1px solid " + C.border, padding: "14px 18px", marginBottom: 8, display: "flex", alignItems: "center", gap: 14, boxShadow: theme === "light" ? "0 2px 8px rgba(110,56,101,0.06)" : "none" }}>
+                  <div style={{ width: 28, height: 28, minWidth: 28, borderRadius: "50%", background: "linear-gradient(135deg," + C.accent + "," + C.darkMid + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.moonPrl, flexShrink: 0 }}>0{i + 1}</div>
+                  <span style={{ fontWeight: 500, fontSize: 13.5, color: C.txtSec, lineHeight: 1.65 }}>{a}</span>
+                </div>
+              ))}
+            </div>
+
+            {lesson.prompt && (
+              <div style={{ marginBottom: 36 }}>
+                <SectionHeader icon="✨" label="Claude Prompt" color={C.accent} />
+                <div style={{ background: BRAND_GRAD, borderRadius: 14, border: "1px solid rgba(255,255,255,0.25)", padding: 26, boxShadow: theme === "light" ? "0 6px 24px rgba(110,56,101,0.2)" : "0 6px 24px rgba(0,0,0,0.3)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 10, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#3A1E33", textTransform: "uppercase" }}>Paste into Claude →</span>
+                    <button onClick={() => copyText(lesson.prompt)} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: "#FFFFFF", background: "#3A1E33", padding: "9px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", cursor: "pointer", textTransform: "uppercase" }}>
+                      {copied ? "✦ Copied" : "Copy"}
+                    </button>
+                  </div>
+                  <div style={{ fontWeight: 500, fontSize: 14, lineHeight: 1.75, color: "#2A1424", whiteSpace: "pre-wrap" }}>{lesson.prompt}</div>
+                </div>
+              </div>
+            )}
+
+            {lesson.inventoryParts && (
+              <div style={{ marginBottom: 36 }}>
+                <SectionHeader icon="🔮" label="The Shadow Inventory" color={C.accent} status={saveStatus} />
+                {lesson.inventoryParts.map((p, pi) => {
+                  const isOpen = !!expandedParts[p.id];
+                  const answeredCount = p.questions.filter(q => journals[q.id] && journals[q.id].text).length;
+                  return (
+                    <div key={p.id} style={{ background: C.bgCard, borderRadius: 14, border: "1px solid " + C.border, marginBottom: 14, boxShadow: theme === "light" ? C.shadow : "none", overflow: "hidden" }}>
+                      <div onClick={() => togglePart(p.id)} style={{ padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, background: isOpen ? (theme === "dark" ? "rgba(110,56,101,0.18)" : "rgba(181,123,174,0.08)") : "transparent", transition: "background .2s" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: C.accent, textTransform: "uppercase", marginBottom: 4 }}>{p.part}</div>
+                          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontWeight: 700, fontSize: 22, color: theme === "dark" ? C.detail : C.accent, lineHeight: 1.2, marginBottom: 4 }}>{p.title}</div>
+                          <div style={{ fontWeight: 500, fontSize: 12.5, color: C.txtMuted, lineHeight: 1.5, fontStyle: "italic" }}>{p.intro}</div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+                          <div style={{ fontSize: 9, fontWeight: 700, color: C.txtFaded, letterSpacing: 1, textTransform: "uppercase" }}>{answeredCount}/{p.questions.length}</div>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", background: isOpen ? "linear-gradient(135deg," + C.accent + "," + C.accentLt + ")" : "transparent", border: isOpen ? "none" : "1px solid " + C.borderMid, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: isOpen ? "#FFFFFF" : C.txtMuted, transition: "all .2s" }}>
+                            {isOpen ? "−" : "+"}
+                          </div>
+                        </div>
+                      </div>
+                      {isOpen && (
+                        <div className="expand-content" style={{ padding: "8px 24px 24px", borderTop: "1px solid " + C.border }}>
+                          {p.questions.map((q, qi) => {
+                            const entry = journals[q.id];
+                            return (
+                              <div key={q.id} style={{ padding: "20px 0", borderBottom: qi < p.questions.length - 1 ? "1px solid " + C.border : "none" }}>
+                                <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 800, color: C.accent, letterSpacing: 1, minWidth: 28, marginTop: 3 }}>{String(qi + 1 + (pi === 0 ? 0 : pi === 1 ? 7 : pi === 2 ? 15 : 23)).padStart(2, "0")}</div>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontWeight: 700, fontSize: 17, color: theme === "dark" ? C.detail : C.accent, marginBottom: 8, lineHeight: 1.4 }}>{q.q}</div>
+                                    <div style={{ fontSize: 12, color: C.txtMuted, lineHeight: 1.6, fontStyle: "italic", marginBottom: 12 }}>
+                                      <span style={{ fontWeight: 700, fontStyle: "normal", textTransform: "uppercase", letterSpacing: 1, fontSize: 9, color: C.accent }}>Go Deeper · </span>
+                                      {q.deeper}
+                                    </div>
+                                    {entry && entry.savedAt && (
+                                      <div style={{ fontSize: 8, fontWeight: 700, color: C.txtFaded, letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>Last saved {new Date(entry.savedAt).toLocaleString()}</div>
+                                    )}
+                                    <textarea
+                                      value={(entry && entry.text) || ""}
+                                      onChange={(ev) => updateJournal(q.id, ev.target.value)}
+                                      placeholder="Write what's true for you, Queen..."
+                                      rows={4}
+                                      style={{ width: "100%", background: C.inputBg, border: "1px solid " + C.border, borderRadius: 10, padding: "12px 14px", fontSize: 13.5, color: C.txtSec, lineHeight: 1.7, resize: "vertical" }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <SaveExportButtons onSave={saveLessonJournals} onExport={() => exportLesson(lesson)} C={C} saveLabel="✦ Save Inventory" />
+                <div style={{ fontWeight: 500, fontSize: 11, color: C.txtFaded, lineHeight: 1.7, marginTop: 14, letterSpacing: 0.3 }}>
+                  Your entries save to this browser. Download the .txt to upload to Google Drive, Notion, or anywhere you keep your reflections.
+                </div>
+              </div>
+            )}
+
+            {lesson.reclamationFields && (
+              <div style={{ marginBottom: 36 }}>
+                <SectionHeader icon="🔮" label="Design Your Reclamation" color={C.accent} status={saveStatus} />
+                {lesson.reclamationFields.map((r, ri) => (
+                  <div key={r.id} style={{ background: C.bgCard, borderRadius: 14, border: "1px solid " + C.border, padding: 24, marginBottom: 14, boxShadow: theme === "light" ? C.shadow : "none" }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: C.accent, textTransform: "uppercase", marginBottom: 4 }}>{r.title}</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontWeight: 700, fontSize: 19, color: theme === "dark" ? C.detail : C.accent, marginBottom: 18, lineHeight: 1.3 }}>{r.intro}</div>
+                    {r.fields.map(f => (
+                      <div key={f.id} style={{ marginBottom: 14 }}>
+                        <div style={{ fontWeight: 700, fontSize: 12, color: C.txtSec, marginBottom: 6, letterSpacing: 0.3 }}>{f.label}</div>
+                        <textarea
+                          value={(journals[f.id] && journals[f.id].text) || ""}
+                          onChange={(ev) => updateJournal(f.id, ev.target.value)}
+                          placeholder={f.placeholder || ""}
+                          rows={2}
+                          style={{ width: "100%", background: C.inputBg, border: "1px solid " + C.border, borderRadius: 10, padding: "12px 14px", fontSize: 13.5, color: C.txtSec, lineHeight: 1.6, resize: "vertical" }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <SaveExportButtons onSave={saveLessonJournals} onExport={() => exportLesson(lesson)} C={C} saveLabel="✦ Save Reclamations" />
+              </div>
+            )}
+
+            {lesson.journals && (
+              <div style={{ marginBottom: 36 }}>
+                <SectionHeader icon="🔮" label="Journal" color={C.accent} status={saveStatus} />
+                {lesson.journals.map(j => {
+                  const entry = journals[j.id];
+                  return (
+                    <div key={j.id} style={{ background: C.bgCard, borderRadius: 14, border: "1px solid " + C.border, padding: 22, marginBottom: 14, boxShadow: theme === "light" ? C.shadow : "none" }}>
+                      <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 17, fontStyle: "italic", fontWeight: 700, color: theme === "dark" ? C.detail : C.accent, marginBottom: 6, lineHeight: 1.4 }}>{j.prompt}</div>
+                      {entry && entry.savedAt && (
+                        <div style={{ fontSize: 8, fontWeight: 700, color: C.txtFaded, letterSpacing: 1, marginBottom: 12, textTransform: "uppercase" }}>Last saved {new Date(entry.savedAt).toLocaleString()}</div>
+                      )}
+                      <textarea
+                        value={(entry && entry.text) || ""}
+                        onChange={(ev) => updateJournal(j.id, ev.target.value)}
+                        placeholder="Write what's true for you today, Queen..."
+                        rows={6}
+                        style={{ width: "100%", background: C.inputBg, border: "1px solid " + C.border, borderRadius: 10, padding: "14px 16px", fontSize: 13.5, color: C.txtSec, lineHeight: 1.75, resize: "vertical", marginTop: 8 }}
+                      />
+                    </div>
+                  );
+                })}
+                <SaveExportButtons onSave={saveLessonJournals} onExport={() => exportLesson(lesson)} C={C} saveLabel="✦ Save Entries" />
+                <div style={{ fontWeight: 500, fontSize: 11, color: C.txtFaded, lineHeight: 1.7, marginTop: 14, letterSpacing: 0.3 }}>
+                  Your entries save to this browser. Download the .txt to upload to Google Drive, Notion, or anywhere you keep your reflections.
+                </div>
+              </div>
+            )}
+
+            {lesson.letterPrompts && (
+              <div style={{ marginBottom: 36 }}>
+                <SectionHeader icon="💌" label="Write Your Letter" color={C.accent} status={saveStatus} />
+                <div style={{ background: C.bgCard, borderRadius: 14, border: "1px solid " + C.border, padding: 24, marginBottom: 14, boxShadow: theme === "light" ? C.shadow : "none" }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontWeight: 700, fontSize: 18, color: theme === "dark" ? C.detail : C.accent, marginBottom: 14, lineHeight: 1.3 }}>Let these prompts move you through the letter</div>
+                  {lesson.letterPrompts.map((p, i) => (
+                    <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "12px 0", borderBottom: i < lesson.letterPrompts.length - 1 ? "1px solid " + C.border : "none" }}>
+                      <div style={{ fontSize: 9, fontWeight: 800, color: C.accent, letterSpacing: 1, minWidth: 22, marginTop: 2 }}>0{i + 1}</div>
+                      <div style={{ fontWeight: 500, fontSize: 13, color: C.txtSec, lineHeight: 1.65 }}>{p}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background: C.bgCard, borderRadius: 14, border: "1px solid " + C.border, padding: 22, marginBottom: 14, boxShadow: theme === "light" ? C.shadow : "none" }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontWeight: 700, fontSize: 17, color: theme === "dark" ? C.detail : C.accent, marginBottom: 6, lineHeight: 1.4 }}>Your Letter</div>
+                  {journals[lesson.letterFieldId] && journals[lesson.letterFieldId].savedAt && (
+                    <div style={{ fontSize: 8, fontWeight: 700, color: C.txtFaded, letterSpacing: 1, marginBottom: 12, textTransform: "uppercase" }}>Last saved {new Date(journals[lesson.letterFieldId].savedAt).toLocaleString()}</div>
+                  )}
+                  <textarea
+                    value={(journals[lesson.letterFieldId] && journals[lesson.letterFieldId].text) || ""}
+                    onChange={(ev) => updateJournal(lesson.letterFieldId, ev.target.value)}
+                    placeholder="Dear..."
+                    rows={18}
+                    style={{ width: "100%", background: C.inputBg, border: "1px solid " + C.border, borderRadius: 10, padding: "16px 18px", fontSize: 14, color: C.txtSec, lineHeight: 1.8, resize: "vertical", marginTop: 8 }}
+                  />
+                </div>
+                <SaveExportButtons onSave={saveLessonJournals} onExport={() => exportLesson(lesson)} C={C} saveLabel="✦ Save Letter" />
+              </div>
+            )}
+
+            <div style={{ marginTop: 44, paddingTop: 28, borderTop: "1px solid " + C.border, display: "flex", gap: 12, justifyContent: "space-between", alignItems: "center" }} className="lesson-bottom">
+              {active > 0 ? (
+                <button onClick={() => setActive(active - 1)} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: C.txtMuted, background: "transparent", padding: "12px 22px", borderRadius: 50, border: "1px solid " + C.borderMid, cursor: "pointer", textTransform: "uppercase" }}>← Previous</button>
+              ) : <span />}
+              {active < MODULE_DATA.lessons.length - 1 && (
+                <button onClick={() => setActive(active + 1)} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: C.moonPrl, background: "linear-gradient(135deg," + C.accent + "," + C.darkMid + ")", padding: "13px 24px", borderRadius: 50, border: "none", cursor: "pointer", textTransform: "uppercase" }}>Next Lesson →</button>
+              )}
+            </div>
+
+            <div style={{ marginTop: 56, paddingTop: 28, borderTop: "1px solid " + C.border, textAlign: "center" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontStyle: "italic", color: C.accent, marginBottom: 6 }}>You are the alchemy.</div>
+              <div style={{ fontSize: 8, fontWeight: 700, color: C.txtFaded, letterSpacing: 2, textTransform: "uppercase" }}>Badass Alchemy · Baddie Society · Quantum Queen</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ icon, label, color, status }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+      <span style={{ fontSize: 16 }}>{icon}</span>
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: color, textTransform: "uppercase" }}>{label}</span>
+      {status && <span style={{ marginLeft: "auto", fontSize: 9, fontWeight: 700, letterSpacing: 1, color: color }}>{status}</span>}
+    </div>
+  );
+}
+
+function SaveExportButtons({ onSave, onExport, C, saveLabel }) {
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
+      <button onClick={onSave} style={{ flex: 1, minWidth: 120, fontSize: 10, fontWeight: 700, letterSpacing: 1, color: C.moonPrl, background: "linear-gradient(135deg," + C.accent + "," + C.darkMid + ")", padding: "12px 20px", borderRadius: 50, border: "none", cursor: "pointer", textTransform: "uppercase" }}>{saveLabel}</button>
+      <button onClick={onExport} style={{ flex: 1, minWidth: 120, fontSize: 10, fontWeight: 700, letterSpacing: 1, color: C.txt, background: "transparent", padding: "11px 20px", borderRadius: 50, border: "1px solid " + C.borderMid, cursor: "pointer", textTransform: "uppercase" }}>⬇ Download .txt</button>
+    </div>
+  );
+}
+
+// Mount
+document.getElementById('loading').style.display = 'none';
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+
+</body>
+</html>
