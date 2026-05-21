@@ -103,7 +103,7 @@ const MODULE_DATA = {
         "Notice which archetype made you flinch, dismiss it, or roll your eyes — that is the assignment.",
         "Use the journal below to identify your dominant light and shadow archetypes."
       ],
-      prompt: "I'm working through the Jungian archetypes lesson in Module 2 of Quantum Queen. Help me identify which archetypes I am consciously living and which ones I have exiled into my shadow. Ask me 4-5 questions about which archetypes I am most drawn to, which ones I judge most harshly in other women, and which expressions of feminine power I have been suppressing. Help me see the pattern without flinching. Be honest, archetype-literate, and direct.",
+
       journals: [
         { id: "arch-1", prompt: "Which archetype do I most identify with in my conscious life? The Mother, the Lover, the Warrior, the Wild Woman, the Queen, the Witch, the Sage, the Creatrix — which one do I lead with?" },
         { id: "arch-2", prompt: "Which archetype do I most judge or dismiss in other women? That is the one I have exiled in myself." },
@@ -127,7 +127,6 @@ const MODULE_DATA = {
         "When you finish a Part, mark this lesson complete only after all four are done.",
         "Download your answers when you finish all 30. Save them. You will read them again on Day 90."
       ],
-      prompt: "I'm working through the 30 Shadow Inventory questions in Module 2 of Quantum Queen. I'm in Part [Surface / Pattern / Wound / Reclamation]. Help me go deeper on the questions that are bringing up the most charge. Do not move me off the discomfort — sit in it with me. Ask me follow-up questions that help me see the pattern under the pattern. Be unflinching but never shaming. Speak to me like a Queen who is remembering.",
       inventoryParts: [
         {
           id: "part-1",
@@ -208,7 +207,6 @@ const MODULE_DATA = {
         "If you cry, good. If you feel rage, good. Both mean the work is landing.",
         "Save your entries. We use them in the Integration Letter."
       ],
-      prompt: "I'm doing the Trigger and Shame Audit in Module 2 of Quantum Queen. Help me map my biggest triggers and the shame underneath them. For each trigger, help me trace what part of myself I am rejecting that gets reflected back at me. For each shame, help me find the woman underneath who is still waiting to be witnessed. Be unflinching but tender. Do not rush me out of the discomfort.",
       journals: [
         { id: "trig-1", prompt: "Trigger Audit — The kind of woman who triggers me the most is... What specifically about her sets me off?" },
         { id: "trig-2", prompt: "What does that trigger reveal about a quality I have exiled in myself? (Anger, ambition, sexuality, neediness, softness, loudness, money, rest — what does she have permission to be that I have not given myself?)" },
@@ -235,7 +233,6 @@ const MODULE_DATA = {
         "Schedule them. Put them in your calendar. Tell one person.",
         "Come back here and journal what shifted after each practice."
       ],
-      prompt: "I'm designing my Reclamation Practice in Module 2 of Quantum Queen. Help me take the qualities I have exiled — the anger, ambition, sexuality, softness, neediness, wildness, whatever surfaced — and design 3 specific, embodied practices I can do this week to bring them back online. Make them small enough that I cannot fail but charged enough that they will actually move the needle. Be practical, not theoretical.",
       reclamationFields: [
         {
           id: "rec-1",
@@ -288,7 +285,6 @@ const MODULE_DATA = {
         "Take as long as you need. Some women write a paragraph. Some write four pages. Both are right.",
         "When you finish — read it out loud, alone. Then save it."
       ],
-      prompt: "I'm writing my Integration Letter for Module 2 of Quantum Queen. This is a letter to my shadow self — the parts of me I exiled, suppressed, judged. Help me write this letter from a place of welcome, not apology. Ask me what she protected me from, what gift she carries, and what I am ready to reclaim through her. Be tender, unflinching, and honest. Help me bring her home.",
       letterPrompts: [
         "Start by addressing her directly. Not 'dear shadow self' if that feels clinical. Write to the specific part of you that came up most powerfully in this module. Your rage. Your grief. The little girl who learned to make herself small. The woman who kept saying yes when she meant no. Whoever showed up — write to her.",
         "I know you have been waiting for me to come find you. I am sorry it took me so long. Tell her how long she has been waiting. Acknowledge the specific experiences that sent her underground.",
@@ -598,21 +594,6 @@ function App() {
                 </div>
               ))}
             </div>
-
-            {lesson.prompt && (
-              <div style={{ marginBottom: 36 }}>
-                <SectionHeader icon="✨" label="Claude Prompt" color={C.accent} />
-                <div style={{ background: BRAND_GRAD, borderRadius: 14, border: "1px solid rgba(255,255,255,0.25)", padding: 26, boxShadow: theme === "light" ? "0 6px 24px rgba(110,56,101,0.2)" : "0 6px 24px rgba(0,0,0,0.3)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#3A1E33", textTransform: "uppercase" }}>Paste into Claude →</span>
-                    <button onClick={() => copyText(lesson.prompt)} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: "#FFFFFF", background: "#3A1E33", padding: "9px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", cursor: "pointer", textTransform: "uppercase" }}>
-                      {copied ? "✦ Copied" : "Copy"}
-                    </button>
-                  </div>
-                  <div style={{ fontWeight: 500, fontSize: 14, lineHeight: 1.75, color: "#2A1424", whiteSpace: "pre-wrap" }}>{lesson.prompt}</div>
-                </div>
-              </div>
-            )}
 
             {lesson.inventoryParts && (
               <div style={{ marginBottom: 36 }}>
